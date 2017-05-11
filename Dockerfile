@@ -33,11 +33,9 @@ RUN install2.r --error --deps TRUE \
     stringr \
     RUnit \
     && rm -rf /tmp/downloaded_packages/
-    
-## Add BiocInstaller and graph which is needed for igraph
-RUN install2.r -r http://bioconductor.org/packages/3.5/bioc --deps TRUE \
-    Biobase \
-    && rm -rf /tmp/downloaded_packages/
+
+## Add biocLite to install Biobase
+RUN Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("Biobase");'
 
 
 ##That's all for the moment
