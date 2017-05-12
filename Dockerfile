@@ -32,6 +32,7 @@ RUN install2.r --error --deps TRUE \
     mfp \
     stringr \
     RUnit \
+    mice \
     && rm -rf /tmp/downloaded_packages/
 
 ## Add biocLite to install Biobase
