@@ -3,15 +3,15 @@
 # Funcio per ajustar un model MFP a la expressio indicada amb totes les exposicions
 # ===========================================================================================
 
-SingleFit <- function(expset, expo, probe, df = 4, select = 0.05, select_adj = NULL)
+SingleFit <- function(data_m, vars_df, probe, df = 4, select = 0.05, select_adj = NULL)
 {
   # Checkings:
-  
+  # Falten imputs variables, gc, que retorni formula (tb a summary)
   if(is.character(probe)){
-    probe_ind <- grep(probe, rownames(exprs(expset)))
+    probe_ind <- grep(probe, rownames(data_m))
     if(length(probe_ind) > 1)
       warning("\nMultiple matching for this probe name.\nFirst element has been selected: ", 
-              rownames(exprs(expset))[probe_ind], "\n")
+              rownames(data_m)[probe_ind], "\n")
     else if (length(probe_ind) == 0)
       stop("\nNo matchings for this probe!\n")
   } else if(is.integer(probe) | is.double(probe)){
@@ -23,7 +23,7 @@ SingleFit <- function(expset, expo, probe, df = 4, select = 0.05, select_adj = N
     }
   
   
-  exprs(expset) <- exprs(expset)[, rownames(expo)]
+  data_m <- data_m[, rownames(vars_df)]
   
   # Required packages:
   require(mfp)
@@ -33,14 +33,14 @@ SingleFit <- function(expset, expo, probe, df = 4, select = 0.05, select_adj = N
   # Corrected select by correlations structure for a global 0.05(default):
   if( !is.null(select_adj) ){
     if(select_adj > 1 | select_adj < 0) {
-      warning("Invalid select.adjust! It will be adjusted for a global 0.05 select value by the correlation matrix of expo.") 
+      warning("Invalid select.adjust! It will be adjusted for a global 0.05 select value by the correlation matrix of variables") 
       select_adj <- NULL
     }
     
   }
   
   if( is.null(select_adj) ){
-    cormat <- cor(expo, use = "pairwise.complete.obs")
+    cormat <- cor(vars_df, use = "pairwise.complete.obs")
     M <- ncol(cormat)
     lambdas <- eigen(cormat)$values
     Vobs <- sum(((lambdas - 1)^2)) / (M - 1)
@@ -52,14 +52,14 @@ SingleFit <- function(expset, expo, probe, df = 4, select = 0.05, select_adj = N
   gc(reset = TRUE)
   
   # Prepare data whith the corresponding outcome (probe):
-  data <- data.frame(cbind(y = exprs(expset)[probe_ind[1],], expo))
+  data <- data.frame(cbind(y = data_m[probe_ind[1],], vars_df), stringsAsFactors = F)
   data <- data[complete.cases(data),]
-  colnames(data) <- c("y", colnames(expo))
+  colnames(data) <- c("y", colnames(vars_df))
   
   # Fit the model:
-  formula <- as.formula(paste0("y ~ ", paste0("fp(", colnames(expo), ", df = ", df, " )", collapse = " + ")))
+  formula <- as.formula(paste0("y ~ ", paste0("fp(", colnames(vars_df), ", df = ", df, " )", collapse = " + ")))
   mod <- try(mfp(formula, select = select_adj, rescale = FALSE, verbose = FALSE, data = data), TRUE)
-  mod$probe_name <- rownames(exprs(expset))[probe_ind[1]]
+  mod$probe_name <- rownames(data_m)[probe_ind[1]]
   mod$vars <- try(unique(as.character(str_sub(word(names(mod$coefficients)[-1],1), start = 1, end = -3))), TRUE)
   mod$p <- try(as.integer(sum(!is.na(mod$vars))), TRUE)
   
@@ -119,7 +119,7 @@ plot.mfp.SingleFit <- function(mod, realpoints = FALSE, xlim, ylim, seed = 1234)
      ylim <- quantile(mod$y, probs = c(.025, .975))
     
     
-    plot(1, type = "n", ylab = expression(f[x]), xlab = "x", rug = FALSE, xlim = xlim, ylim = ylim,
+    plot(1, type = "n", ylab = expression(f[x]), xlab = "x", xlim = xlim, ylim = ylim,
          main = "Partial effects of x", sub = paste0(mod$probe_name), cex.main = 0.9, cex.sub = 0.75)
  
     faux <- function(i){
@@ -141,4 +141,18 @@ plot.mfp.SingleFit <- function(mod, realpoints = FALSE, xlim, ylim, seed = 1234)
   }
 }
 
+
+plot.coef.mfp.SingleFit <- function(mod){
+  #segons la ref https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4876277/
+  require(visreg)
+  
+  if(class(mod)[1] == "try-error"){
+    stop("Error occured in SingleFit()!")
+  } else {
+    
+    if(mod$p == 0) stop("This model hasn't associated variables to be plotted!")
+    #plots all coefficients, we should select just selected variables
+    visreg(mod)
+  
+}
 
