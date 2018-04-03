@@ -3,7 +3,7 @@
 #
 # Version:          1
 # Date              160617 
-# Review1           030418 added caret and gam removed mda 
+# Review1           030418 added caret and gam removed mda from r-base: 3.4.3 
 # Software:         R
 # Description:      R and necessary packages 
 # Website:          https://github.com/isglobal-brge/nlOmicAssoc|https://hub.docker.com/r/lnonell/nlomicsassoc
@@ -12,7 +12,7 @@
 #################################################################
 
 ##Image created on a debian
-FROM r-base:3.4.0
+FROM r-base:3.4.3
 
 #xml needed by Rcompression
 #curl needed by RCurl
