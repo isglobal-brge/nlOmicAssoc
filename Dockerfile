@@ -2,7 +2,8 @@
 # Dockerfile
 #
 # Version:          1
-# Date              160617
+# Date              160617 
+# Review1           030418 added caret and gam removed mda 
 # Software:         R
 # Description:      R and necessary packages 
 # Website:          https://github.com/isglobal-brge/nlOmicAssoc|https://hub.docker.com/r/lnonell/nlomicsassoc
