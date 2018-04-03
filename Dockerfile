@@ -50,15 +50,16 @@ RUN Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("Biobase"
 ## Finally ready to install the R packages.  NOTE: failure to install a package doesn't throw an image build error.
 RUN install2.r --error --deps TRUE \
     MASS \
+    gam \
     mboost \
     partDSA \
     nnet \
-    mda \
     randomForest \
     vegan \
     devtools \
     NeuralNetTools \
     mice \
+    caret \
     && rm -rf /tmp/downloaded_packages/
 
 
