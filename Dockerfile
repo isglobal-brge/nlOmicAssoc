@@ -12,7 +12,7 @@
 #################################################################
 
 ##Image created on a debian
-FROM r-base:3.4.0
+FROM r-base:3.4.3
 
 #xml needed by Rcompression
 #curl needed by RCurl
