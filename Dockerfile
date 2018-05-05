@@ -62,7 +62,7 @@ RUN install2.r --error --deps TRUE \
     && rm -rf /tmp/downloaded_packages/
 
 #ggplot2 seems not to work through install2.r 
-RUN Rscript -e 'install.packages("ggplot2"))'
+RUN Rscript -e 'install.packages("ggplot2")'
 
 #splines has been moved to archive
 RUN wget https://cran.r-project.org/src/contrib/Archive/splines/splines_2.0-7.tar.gz -P /tmp/downloaded_packages
