@@ -44,6 +44,7 @@ RUN install2.r --error --deps TRUE \
     RUnit \
     mgcv \
     mvtnorm \
+    gdtools \
 
     && rm -rf /tmp/downloaded_packages/
  
