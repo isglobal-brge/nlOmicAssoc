@@ -3,7 +3,8 @@
 #
 # Version:          1
 # Date              160617 
-# Review1           030418 added caret and gam removed mda from r-base: 3.4.3 
+# Review2           0050518 added ggplot2 and updated some comments
+# Review1           030418 added caret and gam removed mda from r-base: 3.4.3
 # Software:         R
 # Description:      R and necessary packages 
 # Website:          https://github.com/isglobal-brge/nlOmicAssoc|https://hub.docker.com/r/lnonell/nlomicsassoc
@@ -34,7 +35,7 @@ RUN install2.r -r http://www.omegahat.net/R --deps TRUE \
 RUN wget https://cran.r-project.org/src/contrib/Archive/splines/splines_2.0-7.tar.gz -P /tmp/downloaded_packages
     
 
-## Finally ready to install the R packages.  NOTE: failure to install a package doesn't throw an image build error.
+## First block of R packages installation
 RUN install2.r --error --deps TRUE \
     RCurl \
     xml2 \
@@ -45,10 +46,11 @@ RUN install2.r --error --deps TRUE \
     mvtnorm \
 
     && rm -rf /tmp/downloaded_packages/
-    
+ 
+# Second block of bioconductor R packages needed for the third block R packages
 RUN Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite("Biobase");biocLite("KEGGgraph");biocLite("biomaRt");'
     
-## Finally ready to install the R packages.  NOTE: failure to install a package doesn't throw an image build error.
+## Finally last block
 RUN install2.r --error --deps TRUE \
     MASS \
     gam \
@@ -61,6 +63,7 @@ RUN install2.r --error --deps TRUE \
     NeuralNetTools \
     mice \
     caret \
+    ggplot2 \
     && rm -rf /tmp/downloaded_packages/
 
 
