@@ -1,0 +1,11 @@
+setwd("C:/Juan/CREAL/gCCA")
+load("dades.RData")
+
+x1 <- impute::impute.knn(as.matrix(X1ori))$data
+x2 <- impute::impute.knn(as.matrix(X2ori))$data
+x3 <- impute::impute.knn(as.matrix(X3ori))$data
+
+o <- intersect(intersect(rownames(x1), rownames(x2)), rownames(x3))
+
+X <- x1[o,]
+Y <- cbind(x2, x3)[o,]

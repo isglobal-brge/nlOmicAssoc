@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1536912694238.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4224781337",
+    "id" : "B82697F8",
+    "lastKnownWriteTime" : 1536913203,
+    "last_content_update" : 1536913203616,
+    "path" : "C:/Juan/CREAL/GitHub/nlOmicAssoc/NAMESPACE",
+    "project_path" : "NAMESPACE",
+    "properties" : {
+        "cursorPosition" : "23,15",
+        "scrollLine" : "9"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_namespace"
+}
