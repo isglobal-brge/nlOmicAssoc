@@ -1,0 +1,206 @@
+---
+title: "nlOmicAssoc"
+author: "Lara Nonell"
+date: "25/6/2018"
+output: 
+  BiocStyle::html_document:
+    number_sections: true
+    toc_float: yes
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+
+# Introduction
+
+Association between omic data and continuous variables such as exposome expositions are in many cases not linear. Several methods are proposed to accomodate such relationship. In this package we propose and interface to the following methods:
+
+* Multivariable Fractional Polynomial (MFP) model using stepwise,
+* Envrionmental-wide association study (ExWAS) with Natural Cubic Splines regressions,
+* Generalized Additive Splines model using backfitting (GAM),
+* Generalized Additive model using boosting (GAMboost),
+* Regression Trees model using the algorithm Deletion Substitution Addition (DSA),
+* Random Forest using an implemented variable selection step (RF) and
+* Neural Network with an implemented variable selection step (NNet)
+
+The package provides tools to impute missing variables using `r CRANpkg("mice")` and has functions to filter and obtain variable scores for each method as well and a comparison tool for the obtained results. Plots are also available for results.
+
+# Installation
+
+
+
+# Data
+
+Input data for nlAssoc is the following:
+
+* set: is the omic data set containing probes in rows and samples in columns. Can be a numeric 'matrix', an 'ExpressionSet' or a 'SummarizedExperiment'
+* vars_df: 'data.frame' with exposome variables (continuous). 
+* cores: number of cores to get to work in the case of parallelization (only for linux).
+
+vars_df rownames should match to set columns
+
+# How to start: an example 
+
+## Preparing data
+
+we use data in bioconductor `r Biocpkg("brgedata")`.
+This data set consists of the exposome, transcritopme, methylome and proteome obtained from the same spanish population. For the scope of this example, two data sets are selected, the exposome and the transcriptome. 
+The brgedata transcriptome was obtained from 75 individuals using the HTA 2.0 array (Affymetrix, USA), which provides gene expression for 67,528 transcript clusters. The object is the brge_gexp and is an ExpressionSet.
+The brgedata exposome data set, consisting of 15 exposure variables. The object is brge_expo is an ExposomeSet.
+In the following lines, we will load and study both data sets, find common patients and remove those variables with a more than 70% of missing values.
+
+```{r preproc, warning = FALSE}
+library(nlOmicAssoc)
+
+library(brgedata)
+library(rexposome)
+library(mice)
+
+# ExposomeSet
+data("brge_expo")
+head(expos(brge_expo))
+
+dim(expos(brge_expo)) 
+head(pData(brge_expo)) 
+
+pat_expo<-rownames(pData(brge_expo))
+
+# ExpressionSet 
+data("brge_gexp")
+brge_gexp 
+pat_gexp<-rownames(pData(brge_gexp))
+
+# Common patients
+common_pat<-intersect(pat_expo,pat_gexp)
+
+# Needed objects
+
+data_m<-exprs(brge_gexp)[,common_pat]
+vars_df<-as.data.frame(expos(brge_expo)[common_pat,])
+
+# Missing values in variables
+pNA <- function(x){sum(is.na(x))/length(x)}
+which(apply(vars_df,1,pNA)>(70/100))
+
+# Final vars_df object
+vars_df<-vars_df[!(rownames(vars_df) %in% c("x0031")),]
+
+```
+
+## Applying the model
+
+Once data are prepared, is time to call the method, as an example we will test Multivariable Fractional Polynomial (MFP) model using stepwise.
+
+```{r mfp, warning = FALSE}
+
+n<-200
+
+brge.mfp <- fit.model(set = data_m[1:n,],
+                      vars_df = vars_df,
+                      model = "mfp",
+                      imp_method = 'pmm',
+                      perc_imp = 70,
+                      cores = 1L,
+                      verbose = FALSE)
+
+```
+
+## nlAssoc class
+
+brge.mfp is an object of class nlAssoc that contains seven slots.
+
+```{r nlAssoc, warning = FALSE}
+
+names(brge.mfp)
+
+```
+
+## Summary 
+
+Summary function gives information about the call and the results obtained and will help in following steps to filter results.
+
+```{r summary, warning = FALSE}
+
+summary.nlAssoc(brge.mfp)
+
+```
+
+
+## Filtering results
+
+Results can be filtered using different parameters as the p-value
+
+```{r filter, warning = FALSE}
+
+brge.mfp.f <- filter.nlAssoc(brge.mfp, threshold = 0.05)
+summary.nlAssoc(brge.mfp.f)
+
+```
+
+## Plotting
+
+Plots are obtained for each probe in the gene expression data set. A pdf is created with the comparison between the real data and the predicted by mfp in this case.
+
+```{r plot, warning = FALSE}
+
+#sembla que no xuta...
+#plot.nlAssoc <- function(brge.mfp, top.probes=2, pdf.name=NULL)
+
+```
+
+## Scoring variables
+
+To discern the most important variables in a data set, a scoring measure was defined as the total number of times the variable has been selected divided by the number of total tests performed. This can be obtained by calling funcion score.vars
+
+```{r score, warning = FALSE}
+
+score.vars.nlAssoc(brge.mfp)
+
+```
+
+
+# Compare results among methods
+
+To compare among models the GAM model and ExWAS will also be applied.
+GAM model.
+
+```{r gam, warning = FALSE}
+
+brge.gam <- fit.model(set = data_m[1:n,],
+                      vars_df = vars_df,
+                      model = "gam",
+                      imp_method = 'pmm',
+                      perc_imp = 70,
+                      cores = 1L,
+                      verbose = FALSE)
+summary.nlAssoc(brge.gam)
+
+```
+
+ExWAS model.
+
+```{r ewas, warning = FALSE}
+
+brge.enwas <- fit.model(set = data_m[1:n,],
+                      vars_df = vars_df,
+                      model = "ewas",
+                      imp_method = 'pmm',
+                      perc_imp = 70,
+                      cores = 1L,
+                      verbose = FALSE)
+summary.nlAssoc(brge.enwas)
+
+```
+
+Comparison among the three models. Parameters param, comp and threshold allow to filter each set results by different parameters and compare among them.
+
+```{r comparison, warning = FALSE}
+
+list.meth<-list(brge.enwas,brge.gam,brge.mfp)
+compare.methods(list.meth,filter=T,threshold=0.05) 
+
+```
+

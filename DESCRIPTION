@@ -1,0 +1,44 @@
+Package: nlOmicAssoc
+Title: non-linar omic association 
+Version: 0.0.0.9000
+Authors@R: c(person("Lara", "Nonell", email = "lnonell@imim.cat", role = c("aut", "cre")),
+  person("Juan R.", "Gonzalez", ,"juanr.gonzalez@isglobal.org", role = "aut"))
+Description: non-linar omic association.
+Depends: R (>= 3.4.3)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Imports:
+    Biobase,
+    NeuralNetTools,
+    caret,
+    gam,
+    ggplot2,
+    mboost,
+    mfp,
+    mice,
+    nnet,
+    parallel,
+    partDSA,
+    randomForest,
+    splines,
+    stats,
+    stringr,
+    SummarizedExperiment
+Collate: 
+    'bestNN.R'
+    'bestRF.R'
+    'filter.nlAssoc.R'
+    'compare.methods.R'
+    'fit.ewas.R'
+    'fit.gam.R'
+    'fit.gamboost.R'
+    'fit.mfp.R'
+    'fit.model.R'
+    'fit.nnetwork.R'
+    'fit.partDSA.R'
+    'fit.rforest.R'
+    'plot.nlAssoc.R'
+    'score.vars.nlAssoc.R'
+    'summary.nlAssoc.R'
