@@ -27,5 +27,4 @@ Fits and mfp model for each row in data using mfp package
 }
 \examples{
 to be built
-
 }

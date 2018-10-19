@@ -7,9 +7,7 @@
 #' @param cores cores in case of parallelization (no windows)
 #' @param df degrees of freedom to apply to model
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
-#'
-#' @export fit.gamboost
-#'
+
 fit.gamboost<- function(data = data_m,
                     vars_df = vars_df,
                     df=3,
@@ -19,9 +17,8 @@ fit.gamboost<- function(data = data_m,
 {
 
   # Formula structure for the models: only for numerical vars
-  vars_class<-sapply(vars_df, function(x) class(x))
-  vars_class_group<-split(names(vars_class),vars_class)
-  formula <- as.formula(paste0("y ~ ", paste0(vars_class_group$numeric, collapse = " + ")))
+  vars_numeric <- names(vars_df)
+  formula <- as.formula(paste0("y ~ ", paste0(vars_numeric, collapse = " + ")))
 
   fmodel <- function(y, vars_df, probe)
   {

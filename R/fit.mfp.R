@@ -11,8 +11,6 @@
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
 #'
 #' @examples to be built
-#'
-#' @export fit.mfp
 
 fit.mfp <- function(data = data_m,
                     vars_df = vars_df,
@@ -26,9 +24,8 @@ fit.mfp <- function(data = data_m,
 {
 
   # Formula structure for the models: only for numerical vars
-  vars_class<-sapply(vars_df, function(x) class(x))
-  vars_class_group<-split(names(vars_class),vars_class)
-  formula <- as.formula(paste0("y ~ ", paste0("fp(", vars_class_group$numeric, ", df = ", df, " )", collapse = " + ")))
+  vars_numeric <- names(vars_df)
+  formula <- as.formula(paste0("y ~ ", paste0("fp(", vars_numeric, ", df = ", df, " )", collapse = " + ")))
 
   fmodel <- function(y, vars_df, probe)
   {

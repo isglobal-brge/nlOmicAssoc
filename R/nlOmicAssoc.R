@@ -3,15 +3,12 @@
 #' Prepares data and fits specified model using specific call for each case
 #' Returns an object on nlAssoc class
 #'
-#' @param set numeric matrix, or \code{ExpressionSet} or \code{SummarizedExperiment} with samples as columns and observations as rows could be an ExpressionSet(modif!). rownames!
-#' @param vars_df data.frame with samples as rows and variables as columns
-#' @param df degrees of freedom for mfp, default 4, 1 would be linear
-#' @param select alpha: sets the FP selection level for all predictors. Values for individual predictors may be changed via the fp function in the formula.
-#' @param select_adj select: sets the variable selection level for all predictors. Values for individual predictors may be changed via the fp function in the formula.
+#' @param object numeric matrix, with samples as columns and observations as rows, or \code{ExpressionSet} or \code{SummarizedExperiment}
+#' @param covars data.frame with samples as rows and variables as columns
 #' @param cores cores in case of parallelization (no windows)
-#' @param imp_method imputation method for missing values in variables
-#' @param perc_imp numerical in [0,100], the maximum % of a variable allowed to have Nas
-#' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
+#' @param imp_method imputation method for missing values in variables. Default is pmm
+#' @param perc_imp numerical in [0,100], the maximum \% of a variable allowed to have NAs. Default is 70
+#' @param verbose logical to verbose (comment) the steps of the function. Default is FALSE
 #'
 #' @return nlAssoc
 #'
@@ -34,11 +31,11 @@
 #' @return a file results with model, variables
 #' @examples to be built
 
-#' @export fit.model
+#' @export nlOmicAssoc
 
 
-fit.model <- function(set,
-                      vars_df=NULL,
+nlOmicAssoc <- function(object,
+                      covars=NULL,
                       model = c("dsa","ewas","mfp","gam","gamboost","rforest","nnetwork"),
                       imp_method = 'pmm',
                       perc_imp = 70,
@@ -53,38 +50,45 @@ fit.model <- function(set,
   call<-match.call() #to be returned at the end
   #globalVariables("data_m")
 
-  if (is(set, "matrix")){
+  if (is(object, "matrix")){
 
     #ARGCHECK: numeric data_m
-    if (!is.numeric(set) ) stop("set should be a numeric matrix, an ExpressionSet or a SummarizedExperiment")
-    data_m <- set
+    if (!is.numeric(object) ) stop("object should be a numeric matrix, an ExpressionSet or a SummarizedExperiment")
 
-    #ARGCHECK: vars_df as data.frame
-    if (!is.data.frame(vars_df) ) stop("vars_df should be a data.frame")
+    data_m <- object
 
-    #ARGCHECK: vars_df common patients of data_m
-    if (all(!rownames(vars_df) %in% colnames(data_m)))  stop("vars_df rownames should match to set columns")
+    #ARGCHECK: covars as data.frame
+    if (!is.data.frame(covars) ) stop("covars should be a data.frame")
 
-  } else if (is(set, "ExpressionSet")){
+    #ARGCHECK: covars common patients of data_m
+    if (all(!rownames(covars) %in% colnames(data_m)))  stop("covars rownames should match to object columns")
 
-    data_m <- Biobase::exprs(set)
-    vars_df <- Biobase::pData(set)
+  } else if (is(object, "ExpressionSet")){
 
-  } else if (is(set, "SummarizedExperiment")){
+    data_m <- Biobase::exprs(object)
+    covars <- Biobase::pData(object)
 
-    data_m <- SummarizedExperiment::assay(set)
-    vars_df <- SummarizedExperiment::colData(set)
+  } else if (is(object, "SummarizedExperiment")){
+
+    data_m <- SummarizedExperiment::assay(object)
+    covars <- SummarizedExperiment::colData(object)
 
   } else {
 
-    stop("set must be a numeric matrix, an ExpressionSet or a SummarizedExperiment")
+    stop("object must be a numeric matrix, an ExpressionSet or a SummarizedExperiment")
   }
 
-  vars_class<-sapply(vars_df, function(x) class(x))
-  vars_class_group<-split(names(vars_class),vars_class)
+  vars_class <- sapply(covars, function(x) class(x))
+  vars_def <- names(covars)[vars_class=="numeric"]
+  vars_toremove <- names(covars)[vars_class!="numeric"]
+
 
   #ARGCHECK: numeric variables
-  if(is.null(vars_class_group$numeric))
+  if(length(vars_toremove)>0){
+    covars <-covars[,vars_def]
+    warning(paste0("covariables ",vars_toremove, " will be removed form analysis, for not being numeric" ))
+  }
+  if(length(vars_def)==0)
     stop("variables must contain at least one continuous variable")
 
   #ARGCHECK: model in list
@@ -108,28 +112,28 @@ fit.model <- function(set,
   pNA <- function(x){sum(is.na(x))/length(x)}
 
   #if there are rows or cols with more than perc_imp NAs notify and stop, put perc
-  if (any(apply(vars_df,2,pNA)>(perc_imp/100)))
+  if (any(apply(covars,2,pNA)>(perc_imp/100)))
 
     stop(paste0("There are variables with more than ",perc_imp,"% missing values, please remove or impute those cases and rerun function"))
 
-  if (any(apply(vars_df,1,pNA)>(perc_imp/100)))
+  if (any(apply(covars,1,pNA)>(perc_imp/100)))
 
     stop(paste0("There are patients with more than ",perc_imp,"% missing values, please remove or impute those cases and rerun function"))
 
   #Imputation of missing values
-  if (anyNA(vars_df)){
+  if (anyNA(covars)){
 
     cat("Missing values will be imputed using function specified in imp.method of the mice package\n")
     cat("Imputing missing variables through package mice\n")
-    vars_df_mice <- mice::mice(vars_df, m=1, maxit = 10, method = imp_method, seed = 500) #a 3.4.2 ja no existeix fastpmm???
-    vars_df_mice <- mice::complete(vars_df_mice) #same object as original excepf for rownames
-    rownames(vars_df_mice)<-rownames(vars_df)
-    vars_df <- vars_df_mice
-    rm(vars_df_mice)
+    covars_mice <- mice::mice(covars, m=1, maxit = 10, method = imp_method, seed = 500) #a 3.4.2 ja no existeix fastpmm???
+    covars_mice <- mice::complete(covars_mice) #same object as original excepf for rownames
+    rownames(covars_mice)<-rownames(covars)
+    covars <- covars_mice
+    rm(covars_mice)
 
   }
 
-  data_m <- data_m[, rownames(vars_df)]
+  data_m <- data_m[, rownames(covars)]
 
 #########################
 ##### model call ########
@@ -137,31 +141,31 @@ fit.model <- function(set,
 
   if (model=="dsa"){
 
-    res <- fit.partDSA(data_m, vars_df, df = 3L, cores = cores, verbose=verbose, ...) #not checked
+    res <- fit.partDSA(data_m, vars_df = covars, df = 3L, cores = cores, verbose=verbose, ...) #not checked
 
   } else if (model=="ewas"){
 
-    res <- fit.ewas(data_m, vars_df, df = 3L, cores = cores, verbose=verbose, ...)
+    res <- fit.ewas(data_m, vars_df = covars, df = 3L, cores = cores, verbose=verbose, ...)
 
   } else if (model=="mfp"){
 
-    res<-fit.mfp(data_m, vars_df, df = 4L, cores = cores, verbose=verbose, ...)
+    res<-fit.mfp(data_m, vars_df = covars, df = 4L, cores = cores, verbose=verbose, ...)
 
   } else if (model=="gam"){
 
-    res <- fit.gam(data_m, vars_df, cores = cores,df=4L, verbose=verbose, ...)
+    res <- fit.gam(data_m, vars_df = covars, cores = cores,df=4L, verbose=verbose, ...)
 
   } else if (model=="gamboost"){
 
-    res <- fit.gamboost(data_m, vars_df, df = 3L, cores = cores, verbose=verbose, ...) #si!
+    res <- fit.gamboost(data_m, vars_df = covars, df = 3L, cores = cores, verbose=verbose, ...) #si!
 
   } else if (model=="rforest"){
 
-    res <- fit.rforest(data_m, vars_df, seed = NULL, maxnodes = 15L, ntree = 100L, cores = cores, verbose=verbose, ...)
+    res <- fit.rforest(data_m, vars_df = covars, seed = NULL, maxnodes = 15L, ntree = 100L, cores = cores, verbose=verbose, ...)
 
   } else if (model=="nnetwork"){
 
-    res <- fit.nnetwork(data_m, vars_df, size = 2L,cores = cores, verbose=verbose, ...)
+    res <- fit.nnetwork(data_m, vars_df = covars, size = 2L,cores = cores, verbose=verbose, ...)
 
   }
 
@@ -184,11 +188,13 @@ fit.model <- function(set,
   selected_vars <-  lapply(res, function(x) x[2])
   final_formula <-  lapply(res, function(x) x[3])
 
-  results <- list(table = taula, selected_vars = selected_vars, analysis_vars= colnames(vars_df), final_formula = final_formula)
+  results <- list(table = taula, selected_vars = selected_vars, analysis_vars= colnames(covars), final_formula = final_formula)
 
   results$call <- call
-  results$set.def <- data_m
-  results$vars_df.def <- vars_df
+  results$object <- data_m
+  results$covars <- vars_df
+  results$filter <- FALSE
+
   class(results)<-"nlAssoc"
 
   return(results)

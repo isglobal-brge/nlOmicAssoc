@@ -7,9 +7,7 @@
 #' @param cores cores in case of parallelization (no windows)
 #' @param df degrees of freedom to apply to model
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
-#'
-#' @export fit.partDSA
-#'
+
 fit.partDSA<- function(data = data_m,
                     vars_df = vars_df,
                     df = 3L,

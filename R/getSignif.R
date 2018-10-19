@@ -1,13 +1,13 @@
-#' filtering for an object of class nlAssoc
+#' filtering for an object of class nlAssoc, to get significative results
 #'
-#' @param res an nlAssoc object as obtained in fit.model()
-#' @param param parameter of the table in results to filter with. Default is p
-#' @param comp comparison param comp threshold, p below 0.05 default. Default is below
+#' @param res an nlAssoc object as obtained by nlOmicAssoc()
+#' @param param parameter of the table to filter with (vars_n, aic, Cor2, p or adj.p). Default is "adj.p"
+#' @param comp comparison param comp threshold. Default is "below"
 #' @param threshold numerical, the threshold to select associated variables related to the specified param. Default is 0.05
-#' @export filter.nlAssoc
+#' @export getSignif
 
 
-filter.nlAssoc <- function (res,param="p",comp="below",threshold=0.05, sort.results = TRUE)
+getSignif <- function (res,param="adj.p",comp="below",threshold=0.05, sort.results = TRUE)
 {
 
   if (!param %in% c("vars_n", "aic", "Cor2", "p", "adj.p"))
@@ -37,6 +37,9 @@ filter.nlAssoc <- function (res,param="p",comp="below",threshold=0.05, sort.resu
       res$table <- res.table.f.s
       res$selected_vars <- res$selected_vars[sel.bool]
       res$final_formula <- res$final_formula[sel.bool]
+      res$filter <- TRUE
+      res$filter.param <- param
+      res$filter.threshold <- threshold
 
       return(res)
 

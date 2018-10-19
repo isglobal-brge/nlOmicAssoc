@@ -7,8 +7,7 @@
 #' @param cores cores in case of parallelization (no windows)
 #' @param df degrees of freedom to apply to model
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
-#'
-#' @export fit.gam
+
 
 fit.gam <- function(data = data_m,
                     vars_df = vars_df,
@@ -20,9 +19,10 @@ fit.gam <- function(data = data_m,
 {
 
   # Formula structure for the models: only for numerical vars
-  vars_class<-sapply(vars_df, function(x) class(x))
-  vars_class_group <- split(names(vars_class),vars_class)
-  vars_numeric <- vars_class_group$numeric
+  # vars_class<-sapply(vars_df, function(x) class(x))
+  # vars_class_group <- split(names(vars_class),vars_class)
+  # vars_numeric <- vars_class_group$numeric
+  vars_numeric <- names(vars_df)
   formula <- as.formula(paste0("y ~ ", paste0("s(", vars_numeric, ", df = ", df, " )", collapse = " + ")))
 
   fmodel <- function(y, vars_df, probe)
@@ -31,7 +31,7 @@ fit.gam <- function(data = data_m,
     if(verbose) print(paste("Analyzing probe var ", probe))
 
     # Prepare data whith the corresponding outcome:
-    data <- data.frame(cbind(y = y, vars_df[,vars_numeric]))
+    data <- data.frame(cbind(y = y, vars_df))
     data <- data[complete.cases(data),]
     colnames(data) <- c("y",vars_numeric)
     res.df = T
@@ -67,7 +67,7 @@ fit.gam <- function(data = data_m,
 
     } else {
 
-      vars = try(vars_class_group$numeric[anova(mod)[,3][-1] < 0.05],TRUE)
+      vars = try(vars_numeric[anova(mod)[,3][-1] < 0.05],TRUE)
       vars_n = try(as.integer(sum(!is.na(vars))), TRUE)
       form <- as.formula(paste0("y ~ ", paste0("s(", vars, ", df = ", df, " )", collapse = " + ")))
       y_hat <- predict(mod)

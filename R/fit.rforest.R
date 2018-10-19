@@ -10,9 +10,6 @@
 #' @param ntree number of trees to grow
 #' @param df degrees of freedom to apply to model
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
-#'
-#' @export fit.rforest
-
 
 fit.rforest <- function(data=data_m,
                     vars_df = vars_df,

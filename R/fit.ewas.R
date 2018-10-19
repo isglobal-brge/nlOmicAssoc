@@ -12,8 +12,8 @@
 #' @param df degrees of freedom to apply to model (number of knots in the natural cubic splines)
 #' @param fdr threshold to select linear significative vars in terms of FDR adjusted p.value
 #' @param verbose logical to verbose (comment) the steps of the function, default(FALSE)
-#'
-#' @export fit.ewas
+
+
 
 
 fit.ewas <- function(data = data_m,

@@ -1,9 +1,10 @@
-#' scoring the variables of selected_vars slot in nlAssoc object
+#' scoring the variables of selected_vars slot in an nlAssoc object
 #'
-#' @param res an nlAssoc object as obtained in fit.model()
-#' @export score.vars.nlAssoc
+#' @param res an nlAssoc object as obtained by nlOmicAssoc()
+#'
+#' @export scoreVars
 
-score.vars.nlAssoc <- function (res)
+scoreVars <- function (res)
 {
   #we will return a score of the repeated vars/number of tested probes
   #if there are many null results, % will decrease

@@ -1,7 +1,7 @@
 ---
 title: "nlOmicAssoc"
 author: "Lara Nonell"
-date: "25/6/2018"
+date: "16/10/2018"
 output: 
   BiocStyle::html_document:
     number_sections: true
@@ -34,13 +34,13 @@ The package provides tools to impute missing variables using `r CRANpkg("mice")`
 
 # Data
 
-Input data for nlAssoc is the following:
+The input data for nlAssoc is the following:
 
-* set: is the omic data set containing probes in rows and samples in columns. Can be a numeric 'matrix', an 'ExpressionSet' or a 'SummarizedExperiment'
-* vars_df: 'data.frame' with exposome variables (continuous). 
+* object: is the omic data set containing probes in rows and samples in columns. Can be a numeric 'matrix', an 'ExpressionSet' or a 'SummarizedExperiment'
+* covars: 'data.frame' with exposome variables (continuous). 
 * cores: number of cores to get to work in the case of parallelization (only for linux).
 
-vars_df rownames should match to set columns
+covars rownames should match to object columns
 
 # How to start: an example 
 
@@ -98,8 +98,8 @@ Once data are prepared, is time to call the method, as an example we will test M
 
 n<-200
 
-brge.mfp <- fit.model(set = data_m[1:n,],
-                      vars_df = vars_df,
+brge.mfp <- nlOmicAssoc(object = data_m[1:n,],
+                      covars = vars_df,
                       model = "mfp",
                       imp_method = 'pmm',
                       perc_imp = 70,
@@ -131,11 +131,11 @@ summary.nlAssoc(brge.mfp)
 
 ## Filtering results
 
-Results can be filtered using different parameters as the p-value
+Results can be filtered using different parameters as the FDR adjusted p-value
 
 ```{r filter, warning = FALSE}
 
-brge.mfp.f <- filter.nlAssoc(brge.mfp, threshold = 0.05)
+brge.mfp.f <- getSignif(brge.mfp, threshold = 0.05)
 summary.nlAssoc(brge.mfp.f)
 
 ```
@@ -153,11 +153,11 @@ Plots are obtained for each probe in the gene expression data set. A pdf is crea
 
 ## Scoring variables
 
-To discern the most important variables in a data set, a scoring measure was defined as the total number of times the variable has been selected divided by the number of total tests performed. This can be obtained by calling funcion score.vars
+To discern the most important variables in a data set, a scoring measure was defined as the total number of times the variable has been selected divided by the number of total tests performed. This can be obtained by calling funcion scoreVars
 
 ```{r score, warning = FALSE}
 
-score.vars.nlAssoc(brge.mfp)
+scoreVars(brge.mfp)
 
 ```
 
@@ -169,8 +169,8 @@ GAM model.
 
 ```{r gam, warning = FALSE}
 
-brge.gam <- fit.model(set = data_m[1:n,],
-                      vars_df = vars_df,
+brge.gam <- nlOmicAssoc(object = data_m[1:n,],
+                      covars = vars_df,
                       model = "gam",
                       imp_method = 'pmm',
                       perc_imp = 70,
@@ -184,8 +184,8 @@ ExWAS model.
 
 ```{r ewas, warning = FALSE}
 
-brge.enwas <- fit.model(set = data_m[1:n,],
-                      vars_df = vars_df,
+brge.enwas <- nlOmicAssoc(object = data_m[1:n,],
+                      covars = vars_df,
                       model = "ewas",
                       imp_method = 'pmm',
                       perc_imp = 70,
@@ -200,7 +200,7 @@ Comparison among the three models. Parameters param, comp and threshold allow to
 ```{r comparison, warning = FALSE}
 
 list.meth<-list(brge.enwas,brge.gam,brge.mfp)
-compare.methods(list.meth,filter=T,threshold=0.05) 
+compareMethods(list.meth,filter=T,threshold=0.05) 
 
 ```
 
