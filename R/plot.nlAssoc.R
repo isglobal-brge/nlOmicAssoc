@@ -1,6 +1,6 @@
 #' plot for an object of class nlAssoc
 #'
-#' @param res an nlAssoc object as obtained in fit.model()
+#' @param res an nlAssoc object as obtained by nlOmicAssoc
 #' @param top.probes numeric, number of probes to plot,
 #' @param pdf.name name and path of pdf file to store plots. Default NULL
 

@@ -7,7 +7,7 @@
 \method{plot}{nlAssoc}(res, top.probes = 10, pdf.name = NULL)
 }
 \arguments{
-\item{res}{an nlAssoc object as obtained in fit.model()}
+\item{res}{an nlAssoc object as obtained by nlOmicAssoc}
 
 \item{top.probes}{numeric, number of probes to plot,}
 

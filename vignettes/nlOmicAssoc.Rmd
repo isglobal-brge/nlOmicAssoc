@@ -30,7 +30,11 @@ The package provides tools to impute missing variables using `r CRANpkg("mice")`
 
 # Installation
 
+Installation can be done directly from GitHub with the following instructions
 
+if (!require("devtools")) install.packages("devtools")
+
+devtools::install_github("isglobal-brge/nlOmicAssoc", force = TRUE)
 
 # Data
 
@@ -54,6 +58,7 @@ In the following lines, we will load and study both data sets, find common patie
 
 ```{r preproc, warning = FALSE}
 library(nlOmicAssoc)
+library(BiocStyle)
 
 library(brgedata)
 library(rexposome)
@@ -116,6 +121,8 @@ brge.mfp is an object of class nlAssoc that contains seven slots.
 
 names(brge.mfp)
 
+brge.mfp
+
 ```
 
 ## Summary 
@@ -124,19 +131,19 @@ Summary function gives information about the call and the results obtained and w
 
 ```{r summary, warning = FALSE}
 
-summary.nlAssoc(brge.mfp)
+summary(brge.mfp)
 
 ```
 
 
 ## Filtering results
 
-Results can be filtered using different parameters as the FDR adjusted p-value
+Results can be filtered using different parameters as the FDR adjusted p-value (default)
 
 ```{r filter, warning = FALSE}
 
 brge.mfp.f <- getSignif(brge.mfp, threshold = 0.05)
-summary.nlAssoc(brge.mfp.f)
+summary(brge.mfp.f)
 
 ```
 
@@ -144,12 +151,24 @@ summary.nlAssoc(brge.mfp.f)
 
 Plots are obtained for each probe in the gene expression data set. A pdf is created with the comparison between the real data and the predicted by mfp in this case.
 
-```{r plot, warning = FALSE}
+```{r plot, warning = FALSE, fig.height=4}
 
 #sembla que no xuta...
-#plot.nlAssoc <- function(brge.mfp, top.probes=2, pdf.name=NULL)
+plot(brge.mfp.f, top.probes=2)
 
 ```
+
+## Plotting mfp single results
+
+For the special case were the model applied is mfp, partial effects of a single model can be visualized with function plot.single.mfp. This funcion allows the adjustment of x and y limits in the plot.
+
+```{r plot single mfp, warning = FALSE, fig.height=4}
+
+#sembla que no xuta...
+plot.single.mfp(brge.mfp.f, probe=brge.mfp.f$table$probe[1],xlim=c(0,4))
+
+```
+
 
 ## Scoring variables
 
@@ -165,6 +184,7 @@ scoreVars(brge.mfp)
 # Compare results among methods
 
 To compare among models the GAM model and ExWAS will also be applied.
+
 GAM model.
 
 ```{r gam, warning = FALSE}
@@ -176,7 +196,7 @@ brge.gam <- nlOmicAssoc(object = data_m[1:n,],
                       perc_imp = 70,
                       cores = 1L,
                       verbose = FALSE)
-summary.nlAssoc(brge.gam)
+summary(brge.gam)
 
 ```
 
@@ -191,7 +211,7 @@ brge.enwas <- nlOmicAssoc(object = data_m[1:n,],
                       perc_imp = 70,
                       cores = 1L,
                       verbose = FALSE)
-summary.nlAssoc(brge.enwas)
+summary(brge.enwas)
 
 ```
 

@@ -40,6 +40,7 @@ Collate:
     'fit.rforest.R'
     'nlOmicAssoc.R'
     'plot.nlAssoc.R'
+    'plot.single.mfp.R'
     'print.nlAssoc.R'
     'scoreVars.R'
     'summary.nlAssoc.R'
