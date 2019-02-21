@@ -16,13 +16,13 @@ knitr::opts_chunk$set(message = FALSE, warning = FALSE)
 
 # Introduction
 
-Association between omic data and continuous variables such as exposome expositions are in many cases not linear. Several methods are proposed to accomodate such relationship. In this package we propose and interface to the following methods:
+Association between omic data and continuous variables such as exposures are in many cases not linear. Several methods are proposed to accomodate such relationship. In this package we propose an interface to the following methods:
 
 * Multivariable Fractional Polynomial (MFP) model using stepwise,
-* Envrionmental-wide association study (ExWAS) with Natural Cubic Splines regressions,
+* Exposome-wide association study (ExWASsp) with Natural Cubic Splines regressions,
 * Generalized Additive Splines model using backfitting (GAM),
 * Generalized Additive model using boosting (GAMboost),
-* Regression Trees model using the algorithm Deletion Substitution Addition (DSA),
+* Regression Trees model using the algorithm Deletion Substitution Addition (partDSA),
 * Random Forest using an implemented variable selection step (RF) and
 * Neural Network with an implemented variable selection step (NNet)
 
@@ -38,7 +38,7 @@ devtools::install_github("isglobal-brge/nlOmicAssoc", force = TRUE)
 
 # Data
 
-The input data for nlAssoc is the following:
+The input data for nlAssoc are the following:
 
 * object: is the omic data set containing probes in rows and samples in columns. Can be a numeric 'matrix', an 'ExpressionSet' or a 'SummarizedExperiment'
 * covars: 'data.frame' with exposome variables (continuous). 
@@ -97,7 +97,17 @@ vars_df<-vars_df[!(rownames(vars_df) %in% c("x0031")),]
 
 ## Applying the model
 
-Once data are prepared, is time to call the method, as an example we will test Multivariable Fractional Polynomial (MFP) model using stepwise.
+Once data are prepared, is time to call the method. Methods should be called using the following names:
+
+* mfp: Multivariable Fractional Polynomial model using stepwise,
+* exwassp: Exposome-wide association study with Natural Cubic Splines regressions,
+* gam: Generalized Additive Splines model using backfitting,
+* gamboost: Generalized Additive model using boosting,
+* partdsa: Regression Trees model using the algorithm Deletion Substitution Addition,
+* rforest: Random Forest using an implemented variable selection step and
+* nnetwork: Neural Network with an implemented variable selection step
+
+as an example we will test Multivariable Fractional Polynomial (MFP) model using stepwise.
 
 ```{r mfp, warning = FALSE}
 
@@ -183,7 +193,7 @@ scoreVars(brge.mfp)
 
 # Compare results among methods
 
-To compare among models the GAM model and ExWAS will also be applied.
+To compare among models the GAM model and ExWASsp will also be applied.
 
 GAM model.
 
@@ -204,14 +214,14 @@ ExWAS model.
 
 ```{r ewas, warning = FALSE}
 
-brge.enwas <- nlOmicAssoc(object = data_m[1:n,],
+brge.exwas <- nlOmicAssoc(object = data_m[1:n,],
                       covars = vars_df,
-                      model = "ewas",
+                      model = "exwassp",
                       imp_method = 'pmm',
                       perc_imp = 70,
                       cores = 1L,
                       verbose = FALSE)
-summary(brge.enwas)
+summary(brge.exwas)
 
 ```
 
@@ -219,7 +229,7 @@ Comparison among the three models. Parameters param, comp and threshold allow to
 
 ```{r comparison, warning = FALSE}
 
-list.meth<-list(brge.enwas,brge.gam,brge.mfp)
+list.meth<-list(brge.exwas,brge.gam,brge.mfp)
 compareMethods(list.meth,filter=T,threshold=0.05) 
 
 ```

@@ -36,7 +36,7 @@
 
 nlOmicAssoc <- function(object,
                       covars=NULL,
-                      model = c("dsa","ewas","mfp","gam","gamboost","rforest","nnetwork"),
+                      model = c("partdsa","exwassp","mfp","gam","gamboost","rforest","nnetwork"),
                       imp_method = 'pmm',
                       perc_imp = 70,
                       cores = 1L,
@@ -92,8 +92,8 @@ nlOmicAssoc <- function(object,
     stop("variables must contain at least one continuous variable")
 
   #ARGCHECK: model in list
-  if (!model %in% c("dsa","ewas","mfp","gam","gamboost","rforest","nnetwork"))
-    stop("model has to be one of the following: dsa, ewas, mfp, gam, gamboost, rforest, nnetwork")
+  if (!model %in% c("partdsa","exwassp","mfp","gam","gamboost","rforest","nnetwork"))
+    stop("model has to be one of the following: partdsa, exwassp, mfp, gam, gamboost, rforest, nnetwork")
 
   #ARGCHECK: cores numeric
   if (!is.numeric(cores)) stop("cores should be numeric")
@@ -139,11 +139,11 @@ nlOmicAssoc <- function(object,
 ##### model call ########
 #########################
 
-  if (model=="dsa"){
+  if (model=="partdsa"){
 
     res <- fit.partDSA(data_m, vars_df = covars, df = 3L, cores = cores, verbose=verbose, ...) #not checked
 
-  } else if (model=="ewas"){
+  } else if (model=="exwassp"){
 
     res <- fit.ewas(data_m, vars_df = covars, df = 3L, cores = cores, verbose=verbose, ...)
 

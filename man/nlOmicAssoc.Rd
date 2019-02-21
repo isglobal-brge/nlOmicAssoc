@@ -4,9 +4,9 @@
 \alias{nlOmicAssoc}
 \title{Fits the specified multivariable model to a data.frame or an expressionSet}
 \usage{
-nlOmicAssoc(object, covars = NULL, model = c("dsa", "ewas", "mfp", "gam",
-  "gamboost", "rforest", "nnetwork"), imp_method = "pmm", perc_imp = 70,
-  cores = 1L, verbose = FALSE, ...)
+nlOmicAssoc(object, covars = NULL, model = c("partdsa", "exwassp", "mfp",
+  "gam", "gamboost", "rforest", "nnetwork"), imp_method = "pmm",
+  perc_imp = 70, cores = 1L, verbose = FALSE, ...)
 }
 \arguments{
 \item{object}{numeric matrix, with samples as columns and observations as rows, or \code{ExpressionSet} or \code{SummarizedExperiment}}

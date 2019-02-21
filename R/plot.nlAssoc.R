@@ -49,7 +49,7 @@ plot.nlAssoc <- function(res, top.probes=10, pdf.name=NULL)
 
   if (!is.null(pdf.name)) pdf(file=pdf.name)
 
-  if (model=="ewas"){
+  if (model=="exwassp"){
     #pl <- list()
     for (i in 1:top.probes){
       probe <- sorted.probes[i]
@@ -65,7 +65,7 @@ plot.nlAssoc <- function(res, top.probes=10, pdf.name=NULL)
       print(p)
     }
 
-  } else if (model=="dsa"){
+  } else if (model=="partdsa"){
 
      for (i in 1:top.probes){
       probe <- sorted.probes[i]
